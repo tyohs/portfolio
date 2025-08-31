@@ -1,67 +1,55 @@
-import ProjectCard from '../components/ProjectCard';
+import Image from "next/image";
+import ProjectCard from "@/components/ProjectCard";
+import { projects } from "@/lib/projects";
+import AskMe from "@/components/AskMe";
+import Link from "next/link";
 
-const projects = [
-  {
-    title: "Othello",
-    summary: "A classic Othello game built with Next.js and TypeScript, featuring a clean UI and game logic.",
-    tags: ["Next.js", "TypeScript", "TailwindCSS"],
-    demo: "#",
-    code: "https://github.com/tyohs/othello",
-  },
-  {
-    title: "Minesweeper",
-    summary: "The timeless puzzle game Minesweeper, recreated with modern web technologies.",
-    tags: ["Next.js", "TypeScript", "React"],
-    demo: "#",
-    code: "https://github.com/tyohs/minesweeper",
-  },
-  {
-    title: "Maze Generator & Solver",
-    summary: "A fascinating tool that generates complex mazes and visualizes solving algorithms.",
-    tags: ["Next.js", "TypeScript", "Algorithm"],
-    demo: "#",
-    code: "https://github.com/tyohs/maze",
-  },
-  {
-    title: "self-dialog-bot",
-    summary: "A Streamlit-based chatbot designed for self-dialogue and reflection, powered by Python.",
-    tags: ["Python", "Streamlit", "AI", "Chatbot"],
-    demo: "#",
-    code: "https://github.com/tyohs/self-dialog-bot",
-  },
-];
-
-export default function Home() {
+export default function Page() {
   return (
-    <main className="container mx-auto px-4 py-12">
-      <header className="text-center mb-16">
-        <h1 className="text-5xl font-extrabold mb-2">Taro Yamada</h1>
-        <p className="text-lg text-gray-400">
-          <a href="mailto:example@example.com" className="hover:text-teal-400">example@example.com</a> | INIAD.ts
-        </p>
-      </header>
+<main className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+      {/* Hero */}
+      <section className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8 mb-12">
+        <Image
+          src="https://placehold.co/200x200/a7f3d0/333?text=YH" // or /profile.png
+          alt="Yoh Kaminaga"
+          width={96}
+          height={96}
+          className="rounded-2xl object-cover border border-zinc-200 dark:border-zinc-800"
+          unoptimized // remove this if you use a local image
+        />
+        <div className="space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-bold">
+            <a href="https://github.com/tyohs" target="_blank" rel="noopener noreferrer">Yoh Kaminaga</a> / 神永 陽
+          </h1>
+          <p className="text-zinc-600 dark:text-zinc-400 max-w-prose">
+            東洋大学 INIAD(情報連携学部) 1年 / iniad.ts 所属。TypeScript / React を中心に学習中。ハッカソンや個人開発で実装力を強化しています。
+          </p>
+        </div>
+      </section>
 
-      <section id="projects" className="mb-16">
-        <h2 className="text-4xl font-bold mb-8 text-center border-b-2 border-teal-500 pb-2">
-          Projects
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.map((project) => (
-            <ProjectCard key={project.title} {...project} />
+      {/* Projects */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-bold">Projects</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((p) => (
+            <ProjectCard key={p.title} p={p} />
           ))}
         </div>
       </section>
 
-      <section id="about">
-        <h2 className="text-4xl font-bold mb-8 text-center border-b-2 border-teal-500 pb-2">
-          About Me
-        </h2>
-        <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg border border-gray-700">
-          <p className="text-lg text-gray-300">
-            I am a student at INIAD (Information Networking for Innovation and Design) with a passion for building innovative web applications and exploring new technologies. My interests lie in front-end development, algorithms, and creating intuitive user experiences. This portfolio showcases some of the projects I've worked on.
-          </p>
-        </div>
-      </section>
+      <AskMe />
+
+      {/* Footer */}
+      <footer className="mt-20 border-t border-zinc-200 dark:border-zinc-800 pt-8 text-sm text-zinc-500 dark:text-zinc-400">
+        <p>
+          © {new Date().getFullYear()} Yoh Kaminaga. Built with Next.js + Tailwind.{" "}
+          <span className="opacity-50">/</span>{" "}
+          <a href="https://github.com/YOUR_GH/portfolio" target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            GitHub
+          </a>
+        </p>
+      </footer>
     </main>
   );
 }
+
