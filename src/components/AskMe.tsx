@@ -29,8 +29,12 @@ export default function AskMe() {
 
       setCompletion(data.answer);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unknown error");
+      }
       console.error("Fetch Error:", err);
     } finally {
       setIsLoading(false);
