@@ -41,7 +41,7 @@ export default function AskMe() {
     <div className="relative isolate mt-20">
       <div className="absolute inset-0 bg-white/20 dark:bg-black/30 backdrop-blur-sm z-10 rounded-2xl pointer-events-none"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-200 text-yellow-900 text-sm font-semibold px-4 py-2 rounded-lg z-20 pointer-events-none">
-        現在、回答精度を調整中です
+        現在ポートフォリオの内容を聞けるAIを実装中...
       </div>
 
       <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 p-6 sm:p-8">

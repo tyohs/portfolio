@@ -2,7 +2,6 @@ import Image from "next/image";
 import ProjectCard from "@/components/ProjectCard";
 import { projects } from "@/lib/projects";
 import AskMe from "@/components/AskMe";
-import Link from "next/link";
 
 export default function Page() {
   return (
@@ -19,7 +18,7 @@ export default function Page() {
         />
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-bold">
-            <a href="https://github.com/tyohs" target="_blank" rel="noopener noreferrer">Yoh Kaminaga</a> / 神永 陽
+            <a href="https://github.com/tyohs" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline underline-offset-4 decoration-blue-600/30 dark:decoration-blue-400/30 hover:decoration-blue-600 dark:hover:decoration-blue-400 transition-all">神永 陽/Yoh Kaminaga</a> 
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400 max-w-prose">
             東洋大学 INIAD(情報連携学部) 1年 / iniad.ts 所属。TypeScript / React を中心に学習中。ハッカソンや個人開発で実装力を強化しています。
