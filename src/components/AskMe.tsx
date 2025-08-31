@@ -29,7 +29,7 @@ export default function AskMe() {
 
       setCompletion(data.answer);
 
-    } catch (err) {
+    } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
