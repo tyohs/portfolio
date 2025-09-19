@@ -5,10 +5,6 @@ import { searchCorpus } from "@/lib/rag/vector-store";
 
 export const runtime = "edge";
 
-const openai = new OpenAI({
-  apiKey: process.env.GPT_APIKEY,
-});
-
 const postSchema = z.object({
   prompt: z.string().min(1).max(200),
 });
@@ -17,11 +13,20 @@ export async function POST(req: Request) {
   console.log("--- API Route Called (RAG with Non-Streaming) ---");
 
   try {
+    if (!process.env.GPT_APIKEY) {
+      throw new Error("GPT_APIKEY が設定されていません。環境変数を確認してください。");
+    }
+
     const json = await req.json();
     const { prompt: query } = postSchema.parse(json);
 
+    const openai = new OpenAI({
+      apiKey: process.env.GPT_APIKEY,
+    });
+
     // 1. 関連情報を検索 (RAGロジック復活)
     const context = await searchCorpus(query);
+    const limitedContext = context.slice(0, 3);
 
     // 2. プロンプトを構築 (RAGロジック復活)
     const systemPrompt = `あなたは、Yoh Kaminaga のポートフォリオに関する質問に答える、親切なAIアシスタントです。
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
 回答には、関連する文脈情報の順番に基づいて、[#] の形式で参照番号を付与してください。例えば、1番目の文脈情報を使ったら [#1]、2番目なら [#2] のようにします。
 
 文脈情報:
-${context
+${limitedContext
   .map((c, i) => `[${i + 1}] ${c.title}: ${c.text}`)
   .join("---")}`;
 
@@ -48,8 +53,16 @@ ${context
     const content = response.choices[0].message.content;
     console.log("--- RAG Response Content ---", content);
 
+    const sources = limitedContext.map((item, index) => ({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      snippet: item.text.length > 180 ? `${item.text.slice(0, 177)}...` : item.text,
+      index: index + 1,
+    }));
+
     // 4. 結果をJSONで返す
-    return NextResponse.json({ answer: content });
+    return NextResponse.json({ answer: content, sources });
 
   } catch (error) {
     console.error("API Route Error:", error);

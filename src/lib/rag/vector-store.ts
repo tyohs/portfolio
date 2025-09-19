@@ -11,9 +11,18 @@ const cosineSimilarity = (a: number[], b: number[]) => {
 };
 
 // 2. OpenAIクライアントの初期化
-const openai = new OpenAI({
-  apiKey: process.env.GPT_APIKEY,
-});
+let cachedClient: OpenAI | null = null;
+
+const getOpenAI = () => {
+  if (!cachedClient) {
+    const apiKey = process.env.GPT_APIKEY;
+    if (!apiKey) {
+      throw new Error("GPT_APIKEY が設定されていません。環境変数を確認してください。");
+    }
+    cachedClient = new OpenAI({ apiKey });
+  }
+  return cachedClient;
+};
 
 // 3. コーパスのベクトル化とキャッシュ
 type CorpusVector = {
@@ -32,6 +41,7 @@ const vectorizeCorpus = async (): Promise<CorpusVector[]> => {
   }
 
   console.log("Creating embeddings for the corpus...");
+  const openai = getOpenAI();
   const embeddings = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: corpus.map((c) => c.text),
@@ -57,6 +67,7 @@ export type SearchResult = {
 
 export const searchCorpus = async (query: string, topK = 4): Promise<SearchResult[]> => {
   const corpusVectors = await vectorizeCorpus();
+  const openai = getOpenAI();
 
   const queryEmbedding = await openai.embeddings.create({
     model: "text-embedding-3-small",
@@ -69,5 +80,8 @@ export const searchCorpus = async (query: string, topK = 4): Promise<SearchResul
     similarity: cosineSimilarity(queryVector, v.embedding),
   }));
 
-  return results.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
+  const sorted = results.sort((a, b) => b.similarity - a.similarity);
+  const filtered = sorted.filter((item, index) => item.similarity > 0.12 || index === 0);
+
+  return filtered.slice(0, topK);
 };
