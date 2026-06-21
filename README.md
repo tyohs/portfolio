@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yoh Kaminaga Portfolio
 
-## Getting Started
+神永陽の公開プロジェクトと学習記録を、ターミナルUIで紹介するポートフォリオです。画面右下の「ぎぺん」は、表示中のセクションに反応し、明示的に「質問する」を選んだときだけAI質問画面を開きます。
 
-First, run the development server:
+## Tech stack
+
+- Next.js 15 / React 19 / TypeScript
+- Motion（スクロール・マスコットアニメーション）
+- OpenAI API（ポートフォリオ内の情報に限定した回答）
+- Cloudflare Turnstile（bot対策）
+- Upstash Redis（rate limit・embedding cache）
+- Vitest / ESLint / GitHub Actions
+
+## Local setup
 
 ```bash
+npm ci
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+AI機能を使わずUIだけ確認する場合、環境変数は空のままで構いません。必要な値が1つでも欠けると、AI機能は安全のため無効になります。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Environment variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | ブラウザで表示するTurnstile site key |
+| `TURNSTILE_SECRET_KEY` | Turnstile server verification |
+| `OPENAI_API_KEY` | 回答・embedding生成 |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis access token |
+| `ASK_IP_LIMIT` | 10分あたりのIP別上限（既定: 5） |
+| `ASK_GLOBAL_DAILY_LIMIT` | 1日あたりの全体上限（既定: 50） |
+| `ASK_TIMEOUT_MS` | OpenAI timeout（既定: 12000ms） |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Turnstileでは、本番ドメインとは別に `localhost` を許可したsite keyを用意してください。秘密値を `NEXT_PUBLIC_` 付きの変数へ入れないでください。
 
-## Learn More
+## Security design
 
-To learn more about Next.js, take a look at the following resources:
+- API入力は `{ prompt, turnstileToken }` のみを受け取り、質問は200文字までに制限
+- Turnstile検証後に、IP別5回/10分・全体50回/日のrate limitを適用
+- コーパスembeddingは内容のSHA-256 digestをキーに30日間キャッシュ
+- OpenAIの出力token数、timeout、retry回数、最終文字数を制限
+- promptや回答本文をログへ記録しない
+- 内部エラー、外部サービスの応答、秘密値をクライアントへ返さない
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+IP制限はVercel等の信頼できるreverse proxyが設定する `x-forwarded-for` の先頭値を利用します。独自インフラへ移す場合は、信頼するproxyとヘッダーの設定を再確認してください。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Validation
 
-## Deploy on Vercel
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm audit --omit=dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## AI disclosure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+このポートフォリオの質問機能はOpenAI APIを利用します。回答対象はリポジトリ内の短い紹介文に限定し、記載がない情報を推測しないよう指示しています。ただし生成内容が常に正しい保証はありません。プロジェクトの正確な内容は各GitHubリポジトリを確認してください。
+
+実装とリファクタリングではAIコーディング支援を利用し、内容・セキュリティ設計・動作確認は人間が確認する前提です。
+
+## Credits
+
+「ぎぺん」の画像素材は、ユーザー提供の既存ポートフォリオ素材を再利用しています。無断での再配布・二次利用は行わないでください。
