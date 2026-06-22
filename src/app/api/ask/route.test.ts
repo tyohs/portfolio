@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAskPost, type AskDependencies } from "./route";
 
 const env = {
-  OPENAI_API_KEY: "test-openai",
+  OPENROUTER_API_KEY: "test-openrouter",
+  OPENROUTER_CHAT_MODEL: "test/chat-model",
+  OPENROUTER_EMBEDDING_MODEL: "openai/text-embedding-3-small",
   TURNSTILE_SECRET_KEY: "test-turnstile",
   UPSTASH_REDIS_REST_URL: "https://example.invalid",
   UPSTASH_REDIS_REST_TOKEN: "test-redis",
@@ -33,6 +35,14 @@ describe("POST /api/ask", () => {
     expect(response.status).toBe(503);
   });
 
+  it("fails closed when the OpenRouter model is not explicitly configured", async () => {
+    const response = await createAskPost(dependencies(), {
+      ...env,
+      OPENROUTER_CHAT_MODEL: undefined,
+    })(request({ prompt: "hello", turnstileToken: "token" }));
+    expect(response.status).toBe(503);
+  });
+
   it("rejects prompts over 200 characters before calling services", async () => {
     const deps = dependencies();
     const response = await createAskPost(deps, env)(request({ prompt: "a".repeat(201), turnstileToken: "token" }));
@@ -59,6 +69,11 @@ describe("POST /api/ask", () => {
     const response = await createAskPost(deps, env)(request({ prompt: "MinKara?", turnstileToken: "ok" }));
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ answer: "MinKaraはリアルタイム音楽ゲームです。" });
-    expect(deps.answer).toHaveBeenCalledWith("MinKara?", expect.objectContaining({ ipLimit: 5, globalLimit: 50 }));
+    expect(deps.answer).toHaveBeenCalledWith("MinKara?", expect.objectContaining({
+      ipLimit: 5,
+      globalLimit: 50,
+      chatModel: "test/chat-model",
+      embeddingModel: "openai/text-embedding-3-small",
+    }));
   });
 });

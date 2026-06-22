@@ -6,9 +6,6 @@ import { corpus } from "./data";
 type CorpusVector = (typeof corpus)[number] & { embedding: number[] };
 export type SearchResult = CorpusVector & { similarity: number };
 
-const corpusDigest = createHash("sha256").update(JSON.stringify(corpus)).digest("hex");
-const cacheKey = `portfolio:embeddings:${corpusDigest}`;
-
 function cosineSimilarity(a: number[], b: number[]) {
   const dot = a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
   const magnitudeA = Math.sqrt(a.reduce((sum, value) => sum + value * value, 0));
@@ -16,11 +13,15 @@ function cosineSimilarity(a: number[], b: number[]) {
   return magnitudeA && magnitudeB ? dot / (magnitudeA * magnitudeB) : 0;
 }
 
-async function vectorizeCorpus(openai: OpenAI, redis: Redis): Promise<CorpusVector[]> {
+async function vectorizeCorpus(openai: OpenAI, redis: Redis, embeddingModel: string): Promise<CorpusVector[]> {
+  const corpusDigest = createHash("sha256")
+    .update(JSON.stringify({ corpus, embeddingModel }))
+    .digest("hex");
+  const cacheKey = `portfolio:embeddings:${corpusDigest}`;
   const cached = await redis.get<CorpusVector[]>(cacheKey);
   if (cached) return cached;
   const result = await openai.embeddings.create({
-    model: "text-embedding-3-small",
+    model: embeddingModel,
     input: corpus.map((item) => item.text),
   });
   const vectors = corpus.map((item, index) => ({
@@ -31,10 +32,10 @@ async function vectorizeCorpus(openai: OpenAI, redis: Redis): Promise<CorpusVect
   return vectors;
 }
 
-export async function searchCorpus(query: string, openai: OpenAI, redis: Redis, topK = 3) {
+export async function searchCorpus(query: string, openai: OpenAI, redis: Redis, embeddingModel: string, topK = 3) {
   const [vectors, queryResult] = await Promise.all([
-    vectorizeCorpus(openai, redis),
-    openai.embeddings.create({ model: "text-embedding-3-small", input: query }),
+    vectorizeCorpus(openai, redis, embeddingModel),
+    openai.embeddings.create({ model: embeddingModel, input: query }),
   ]);
   const queryVector = queryResult.data[0].embedding;
   return vectors

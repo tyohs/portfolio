@@ -14,7 +14,11 @@ const requestSchema = z.object({
 }).strict();
 
 type AskConfig = {
-  openAiKey: string;
+  openRouterKey: string;
+  chatModel: string;
+  embeddingModel: string;
+  siteUrl?: string;
+  appName?: string;
   turnstileSecret: string;
   redisUrl: string;
   redisToken: string;
@@ -37,10 +41,28 @@ function positiveInteger(value: string | undefined, fallback: number) {
 type Environment = Record<string, string | undefined>;
 
 function readConfig(env: Environment): AskConfig | null {
-  const { OPENAI_API_KEY, TURNSTILE_SECRET_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = env;
-  if (!OPENAI_API_KEY || !TURNSTILE_SECRET_KEY || !UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) return null;
+  const {
+    OPENROUTER_API_KEY,
+    OPENROUTER_CHAT_MODEL,
+    OPENROUTER_EMBEDDING_MODEL,
+    TURNSTILE_SECRET_KEY,
+    UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN,
+  } = env;
+  if (
+    !OPENROUTER_API_KEY ||
+    !OPENROUTER_CHAT_MODEL ||
+    !OPENROUTER_EMBEDDING_MODEL ||
+    !TURNSTILE_SECRET_KEY ||
+    !UPSTASH_REDIS_REST_URL ||
+    !UPSTASH_REDIS_REST_TOKEN
+  ) return null;
   return {
-    openAiKey: OPENAI_API_KEY,
+    openRouterKey: OPENROUTER_API_KEY,
+    chatModel: OPENROUTER_CHAT_MODEL,
+    embeddingModel: OPENROUTER_EMBEDDING_MODEL,
+    siteUrl: env.OPENROUTER_SITE_URL,
+    appName: env.OPENROUTER_APP_NAME,
     turnstileSecret: TURNSTILE_SECRET_KEY,
     redisUrl: UPSTASH_REDIS_REST_URL,
     redisToken: UPSTASH_REDIS_REST_TOKEN,
@@ -62,11 +84,20 @@ async function checkLimits(ip: string, config: AskConfig) {
 }
 
 async function answerQuestion(prompt: string, config: AskConfig) {
-  const openai = new OpenAI({ apiKey: config.openAiKey, timeout: config.timeoutMs, maxRetries: 1 });
+  const defaultHeaders: Record<string, string> = {};
+  if (config.siteUrl) defaultHeaders["HTTP-Referer"] = config.siteUrl;
+  if (config.appName) defaultHeaders["X-OpenRouter-Title"] = config.appName;
+  const openai = new OpenAI({
+    apiKey: config.openRouterKey,
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultHeaders,
+    timeout: config.timeoutMs,
+    maxRetries: 1,
+  });
   const redis = new Redis({ url: config.redisUrl, token: config.redisToken });
-  const context = await searchCorpus(prompt, openai, redis);
+  const context = await searchCorpus(prompt, openai, redis, config.embeddingModel);
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: config.chatModel,
     max_tokens: 180,
     temperature: 0.2,
     messages: [
