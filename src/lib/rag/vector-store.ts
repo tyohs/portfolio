@@ -1,87 +1,45 @@
-import OpenAI from "openai";
+import { createHash } from "node:crypto";
+import type OpenAI from "openai";
+import type { Redis } from "@upstash/redis";
 import { corpus } from "./data";
 
-// 1. ベクトル計算のヘルパー関数
-const cosineSimilarity = (a: number[], b: number[]) => {
-  const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
-  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-  if (magnitudeA === 0 || magnitudeB === 0) return 0;
-  return dotProduct / (magnitudeA * magnitudeB);
-};
+type CorpusVector = (typeof corpus)[number] & { embedding: number[] };
+export type SearchResult = CorpusVector & { similarity: number };
 
-// 2. OpenAIクライアントの初期化
-let cachedClient: OpenAI | null = null;
+function cosineSimilarity(a: number[], b: number[]) {
+  const dot = a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
+  const magnitudeA = Math.sqrt(a.reduce((sum, value) => sum + value * value, 0));
+  const magnitudeB = Math.sqrt(b.reduce((sum, value) => sum + value * value, 0));
+  return magnitudeA && magnitudeB ? dot / (magnitudeA * magnitudeB) : 0;
+}
 
-const getOpenAI = () => {
-  if (!cachedClient) {
-    const apiKey = process.env.GPT_APIKEY;
-    if (!apiKey) {
-      throw new Error("GPT_APIKEY が設定されていません。環境変数を確認してください。");
-    }
-    cachedClient = new OpenAI({ apiKey });
-  }
-  return cachedClient;
-};
-
-// 3. コーパスのベクトル化とキャッシュ
-type CorpusVector = {
-  id: string;
-  title: string;
-  text: string;
-  url?: string;
-  embedding: number[];
-};
-
-let vectorizedCorpus: CorpusVector[] | null = null;
-
-const vectorizeCorpus = async (): Promise<CorpusVector[]> => {
-  if (vectorizedCorpus) {
-    return vectorizedCorpus;
-  }
-
-  console.log("Creating embeddings for the corpus...");
-  const openai = getOpenAI();
-  const embeddings = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: corpus.map((c) => c.text),
+async function vectorizeCorpus(openai: OpenAI, redis: Redis, embeddingModel: string): Promise<CorpusVector[]> {
+  const corpusDigest = createHash("sha256")
+    .update(JSON.stringify({ corpus, embeddingModel }))
+    .digest("hex");
+  const cacheKey = `portfolio:embeddings:${corpusDigest}`;
+  const cached = await redis.get<CorpusVector[]>(cacheKey);
+  if (cached) return cached;
+  const result = await openai.embeddings.create({
+    model: embeddingModel,
+    input: corpus.map((item) => item.text),
   });
-
-  vectorizedCorpus = corpus.map((c, i) => ({
-    ...c,
-    embedding: embeddings.data[i].embedding,
+  const vectors = corpus.map((item, index) => ({
+    ...item,
+    embedding: result.data[index].embedding,
   }));
-  console.log("Embeddings created and cached.");
+  await redis.set(cacheKey, vectors, { ex: 60 * 60 * 24 * 30 });
+  return vectors;
+}
 
-  return vectorizedCorpus;
-};
-
-// 4. 検索関数の実装
-export type SearchResult = {
-  id: string;
-  title: string;
-  text: string;
-  url?: string;
-  similarity: number;
-};
-
-export const searchCorpus = async (query: string, topK = 4): Promise<SearchResult[]> => {
-  const corpusVectors = await vectorizeCorpus();
-  const openai = getOpenAI();
-
-  const queryEmbedding = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: query,
-  });
-  const queryVector = queryEmbedding.data[0].embedding;
-
-  const results = corpusVectors.map((v) => ({
-    ...v,
-    similarity: cosineSimilarity(queryVector, v.embedding),
-  }));
-
-  const sorted = results.sort((a, b) => b.similarity - a.similarity);
-  const filtered = sorted.filter((item, index) => item.similarity > 0.12 || index === 0);
-
-  return filtered.slice(0, topK);
-};
+export async function searchCorpus(query: string, openai: OpenAI, redis: Redis, embeddingModel: string, topK = 3) {
+  const [vectors, queryResult] = await Promise.all([
+    vectorizeCorpus(openai, redis, embeddingModel),
+    openai.embeddings.create({ model: embeddingModel, input: query }),
+  ]);
+  const queryVector = queryResult.data[0].embedding;
+  return vectors
+    .map((item) => ({ ...item, similarity: cosineSimilarity(queryVector, item.embedding) }))
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, topK);
+}

@@ -1,24 +1,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Yoh Kaminaga | Portfolio",
-  description: "INIAD 1st-year | TypeScript/React | Hackathon & Side Projects",
+  title: "神永 陽 / Yoh Kaminaga | Portfolio",
+  description:
+    "東洋大学 INIADでWeb開発とAI活用を学ぶ、神永陽のポートフォリオ。",
   openGraph: {
-    title: "Yoh Kaminaga | Portfolio",
-    description: "TypeScript/React projects: Eda.ai, Othello, Minesweeper, self-dialog-bot",
+    title: "神永 陽 / Yoh Kaminaga | Portfolio",
+    description: "MinKara、Eda.ai、Minesweeper、Othelloの開発記録。",
+    type: "website",
   },
-  metadataBase: new URL("https://your-vercel-url.vercel.app"), // デプロイ後に置換
   icons: { icon: "/favicon.ico" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-<html lang="ja" className="dark">
-      <body className={`${inter.className} bg-gradient-to-br from-zinc-50 to-zinc-100 text-zinc-900 antialiased dark:from-zinc-950 dark:to-zinc-900 dark:text-zinc-50`}>{children}</body>
+    <html lang="ja">
+      <body>{children}</body>
     </html>
   );
 }
