@@ -16,13 +16,13 @@ export type Project = {
 export const projects: Project[] = [
   {
     name: "MinKara",
-    description: "複数人で同じ楽曲を演奏できる、リアルタイム音楽ゲーム。",
+    description: "チームリーダーとして開発した、複数端末でルーム・音声を同期するリアルタイム音楽ゲーム。",
     stack: "Next.js / TypeScript / Supabase",
     href: "https://github.com/tyohs/MinKara",
   },
   {
     name: "Eda.ai",
-    description: "会話を枝分かれさせて思考を探索する、ハッカソン発の対話UI。",
+    description: "フロントエンドを担当した、会話を枝分かれさせて思考を探索するハッカソン作品。",
     stack: "Next.js / TypeScript / Gemini API",
     href: "https://github.com/50ki-1706/Eda.ai",
   },
@@ -53,7 +53,7 @@ export const sections: TerminalSectionData[] = [
     label: "Profile",
     command: "cat profile.txt",
     output:
-      "Name: 神永 陽 / Yoh Kaminaga\nUniversity: 東洋大学 情報連携学部（INIAD）\nFocus: Web development / AI / Community\nGitHub: @tyohs",
+      "Name: 神永 陽 / Yoh Kaminaga\nUniversity: 東洋大学 情報連携学部（INIAD）\nLearning: 42 Tokyo\nFocus: Web development / AI / Community\nGitHub: @tyohs",
     gipenLine: "大学入学後から、作って学ぶを続けています",
   },
   {
@@ -67,7 +67,7 @@ export const sections: TerminalSectionData[] = [
     label: "Experience",
     command: "cat experience.log",
     output:
-      "2026  学部2年 / 個人・チーム開発を継続\n2025  ハッカソンでEda.aiをチーム開発\n      学内コミュニティの運営と勉強会に参加",
+      "2025.12–現在  StartGear Inc. フルスタック開発インターン\n2025–現在     学生技術コミュニティ geeken 代表\n2025          ハッカソンでEda.aiをチーム開発\n現在          42 TokyoでCとコンピュータ基礎を学習",
     gipenLine: "個人開発とチーム開発、どちらも経験しています",
   },
   {
@@ -75,7 +75,7 @@ export const sections: TerminalSectionData[] = [
     label: "Skills",
     command: "cat skills.json",
     output:
-      "{\n  \"main\": [\"TypeScript\", \"React\", \"Next.js\"],\n  \"learning\": [\"Python\", \"C\", \"Supabase\"],\n  \"interests\": [\"Realtime Web\", \"AI-assisted development\"]\n}",
+      "{\n  \"main\": [\"TypeScript\", \"React\", \"Next.js\"],\n  \"used\": [\"Supabase\", \"PostgreSQL\", \"Vercel\"],\n  \"learning\": [\"Python\", \"C\"],\n  \"interests\": [\"Realtime Web\", \"AI-assisted development\"]\n}",
     gipenLine: "TypeScriptとReactを中心に学んでいます",
   },
   {

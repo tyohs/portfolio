@@ -54,8 +54,11 @@ async function checkLimits(ip: string, config: AskConfig) {
   const redis = new Redis({ url: config.redisUrl, token: config.redisToken });
   const perIp = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(config.ipLimit, "10 m"), prefix: "portfolio:ask:ip" });
   const global = new Ratelimit({ redis, limiter: Ratelimit.fixedWindow(config.globalLimit, "1 d"), prefix: "portfolio:ask:global" });
-  const [ipResult, globalResult] = await Promise.all([perIp.limit(ip), global.limit("all")]);
-  return ipResult.success && globalResult.success;
+  const ipResult = await perIp.limit(ip);
+  if (!ipResult.success) return false;
+
+  const globalResult = await global.limit("all");
+  return globalResult.success;
 }
 
 async function answerQuestion(prompt: string, config: AskConfig) {

@@ -4,19 +4,24 @@ export const corpus: CorpusData[] = [
   {
     id: "profile",
     title: "Profile",
-    text: "神永陽は東洋大学 情報連携学部（INIAD）の学部2年生です。TypeScript、React、Next.jsを中心に、Web開発とAI活用を学んでいます。",
+    text: "神永陽は東洋大学 情報連携学部（INIAD）の学部2年生です。TypeScript、React、Next.jsを中心にWeb開発へ取り組み、42 TokyoではCとコンピュータ基礎を学んでいます。",
   },
   {
     id: "minkara",
     title: "MinKara",
     url: "https://github.com/tyohs/MinKara",
-    text: "MinKaraは複数人で同じ楽曲を演奏できるリアルタイム音楽ゲームです。Next.js、TypeScript、Supabaseを利用しています。",
+    text: "MinKaraはチームリーダーとして開発した、複数端末でルームと音声を同期して同じ楽曲を演奏するリアルタイム音楽ゲームです。Next.js、TypeScript、Supabaseを利用しています。",
   },
   {
     id: "eda-ai",
     title: "Eda.ai",
     url: "https://github.com/50ki-1706/Eda.ai",
-    text: "Eda.aiは会話を枝分かれさせ、複数の方向へ思考を探索するための対話UIです。ハッカソンでチーム開発しました。",
+    text: "Eda.aiは会話を枝分かれさせ、複数の方向へ思考を探索するための対話UIです。ハッカソンでチーム開発し、神永陽はフロントエンドを担当しました。",
+  },
+  {
+    id: "experience",
+    title: "Experience",
+    text: "神永陽は2025年12月からStartGear Inc.でフルスタック開発インターンをしています。2025年から学生技術コミュニティgeekenの代表を務め、現在は42 Tokyoでも学習しています。",
   },
   {
     id: "minesweeper",
