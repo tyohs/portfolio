@@ -24,10 +24,12 @@ export function AskPanel({ open, onClose }: AskPanelProps) {
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
+  const [turnstileError, setTurnstileError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+    setTurnstileError("");
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -41,9 +43,17 @@ export function AskPanel({ open, onClose }: AskPanelProps) {
       sitekey: siteKey,
       theme: "dark",
       size: "flexible",
-      callback: (nextToken: string) => setToken(nextToken),
+      callback: (nextToken: string) => {
+        setToken(nextToken);
+        setTurnstileError("");
+      },
       "expired-callback": () => setToken(""),
-      "error-callback": () => setToken(""),
+      "error-callback": (code: string | number) => {
+        setToken("");
+        setTurnstileError(String(code) === "110200"
+          ? "この公開ドメインがTurnstileの許可対象に含まれていません。サイト管理者の設定を確認してください。"
+          : "認証を完了できませんでした。ページを再読み込みしてもう一度お試しください。");
+      },
     });
     return () => {
       if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
@@ -90,6 +100,7 @@ export function AskPanel({ open, onClose }: AskPanelProps) {
             <textarea id="portfolio-question" value={prompt} maxLength={200} onChange={(event) => setPrompt(event.target.value)} placeholder="MinKaraについて教えて" disabled={loading} autoFocus />
             <div className="ask-count">{prompt.length}/200</div>
             <div ref={widgetContainer} className="turnstile-slot" />
+            {turnstileError ? <p className="terminal-error" role="alert">{turnstileError}</p> : null}
             <button className="terminal-submit" type="submit" disabled={loading || !prompt.trim() || !token}>{loading ? "running..." : "run"}</button>
           </form>
         )}
