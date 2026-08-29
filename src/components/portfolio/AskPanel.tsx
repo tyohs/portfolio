@@ -15,6 +15,23 @@ declare global {
 
 type AskPanelProps = { open: boolean; onClose: () => void };
 
+function getTurnstileErrorMessage(code: string | number) {
+  switch (String(code)) {
+    case "400020":
+    case "110100":
+    case "110110":
+      return "TurnstileのSite keyが無効です。Cloudflareで作成したウィジェットのSite keyをVercelのNEXT_PUBLIC_TURNSTILE_SITE_KEYに設定してください。";
+    case "400070":
+      return "Turnstileのウィジェットが無効化されています。Cloudflareのウィジェット設定を確認してください。";
+    case "110200":
+      return "この公開ドメインがTurnstileの許可対象に含まれていません。CloudflareのHostname Managementに公開ドメインを追加してください。";
+    case "200500":
+      return "Turnstileを読み込めませんでした。広告ブロッカーやVPNを一時的に無効にして再読み込みしてください。";
+    default:
+      return "認証を完了できませんでした。ページを再読み込みしてもう一度お試しください。";
+  }
+}
+
 export function AskPanel({ open, onClose }: AskPanelProps) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const widgetContainer = useRef<HTMLDivElement>(null);
@@ -50,9 +67,7 @@ export function AskPanel({ open, onClose }: AskPanelProps) {
       "expired-callback": () => setToken(""),
       "error-callback": (code: string | number) => {
         setToken("");
-        setTurnstileError(String(code) === "110200"
-          ? "この公開ドメインがTurnstileの許可対象に含まれていません。サイト管理者の設定を確認してください。"
-          : "認証を完了できませんでした。ページを再読み込みしてもう一度お試しください。");
+        setTurnstileError(getTurnstileErrorMessage(code));
       },
     });
     return () => {
