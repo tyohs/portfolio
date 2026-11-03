@@ -1,36 +1,28 @@
 {
-  "name": "portfolio",
-  "version": "0.1.0",
+  "name": "yoh-kaminaga-portfolio",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint . --max-warnings=0",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "dev": "astro dev --host 127.0.0.1 --port 4184",
+    "check": "astro check",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1 --port 4184",
+    "test": "node --test tests/site.test.mjs",
+    "verify": "npm run check && npm run build && npm test",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.38.0",
-    "motion": "^12.40.0",
-    "next": "15.5.28",
-    "openai": "^5.16.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "zod": "^3.25.76"
+    "astro": "7.4.5"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^4.1.9",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.28",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.1.9"
+    "@astrojs/check": "0.9.12",
+    "typescript": "6.0.3",
+    "wrangler": "4.157.0"
   }
 }
+

@@ -1,0 +1,19 @@
+---
+import type { PeriodData } from '../data/portfolio';
+
+interface Props extends PeriodData {}
+const { start, end, current, endIsExpected = false } = Astro.props;
+const compact = (value: string) => value.replace('-', '.');
+const human = (value: string) => {
+  const [year, month] = value.split('-');
+  return `${year}年${Number(month)}月`;
+};
+const finish = end ? compact(end) : current === null ? null : '現在';
+const label = human(start) + (end ? ' – ' + human(end) : current === null ? '〜' : ' – 現在') + (endIsExpected ? '（卒業予定）' : '');
+---
+<div class="period" aria-label={label}>
+  <span>{compact(start)}</span>
+  <span>{finish ? '— ' + finish : '〜'}</span>
+  {endIsExpected && <span>卒業予定</span>}
+</div>
+

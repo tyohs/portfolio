@@ -1,0 +1,60 @@
+---
+import Page from '../layouts/Page.astro';
+import Profile from '../components/Profile.astro';
+import ExperienceEntry from '../components/ExperienceEntry.astro';
+import Period from '../components/Period.astro';
+import Icon from '../components/Icon.astro';
+import { profile, experiences, education, skills } from '../data/portfolio';
+
+const years = [...new Set(experiences.map(entry => entry.start.slice(0, 4)))];
+---
+<Page>
+  <div class="design" id="top">
+    <header class="masthead">
+      <a class="wordmark" href="#top">{profile.roman}</a>
+      <a class="contact-shortcut" href="#contact"><Icon name="Email" /><span>連絡する</span></a>
+    </header>
+    <div class="page-grid">
+      <Profile />
+      <main>
+        <section class="section career" id="career">
+          <div class="section-heading"><h2>経歴・活動</h2></div>
+          {years.map(year => (
+            <div class="year-group">
+              <h3 class="year-heading">{year}</h3>
+              <div class="year-entries">
+                {experiences.filter(entry => entry.start.startsWith(year)).map(entry => <ExperienceEntry entry={entry} />)}
+              </div>
+            </div>
+          ))}
+        </section>
+        <section class="section education" id="education">
+          <div class="section-heading"><h2>学歴</h2></div>
+          <div class="education-list">
+            {education.map(entry => (
+              <article class="entry education-entry">
+                <Period {...entry} />
+                <div class="entry-content">
+                  <h3>{entry.organization}</h3>
+                  <p class="entry-role">{entry.field}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section class="section skills" id="skills">
+          <div class="section-heading"><h2>スキル</h2></div>
+          <ul class="skill-list">{skills.map(skill => <li>{skill}</li>)}</ul>
+        </section>
+        <footer id="contact" class="section contact">
+          <p class="contact-caption">お仕事の連絡はこちら</p>
+          <a class="email" href={`mailto:${profile.email}`}>
+            <Icon name="Email" /><span>{profile.email}</span><Icon name="ArrowUpRight" />
+          </a>
+        </footer>
+      </main>
+    </div>
+    <div class="bottom-line"><span>{profile.roman}</span><a href="#top">ページの先頭へ ↑</a></div>
+  </div>
+</Page>
+

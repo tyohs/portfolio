@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+
+interface Props { title?: string; description?: string; }
+const {
+  title = '神永 陽 | Yoh Kaminaga',
+  description = '神永 陽の経歴・活動、学歴、スキル。Web開発・AIコンサルタント、GeeKEN代表。東洋大学 INIAD・42 Tokyo。',
+} = Astro.props;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+const image = Astro.site ? new URL('/images/gipen-original.jpg', Astro.site) : undefined;
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#111111" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <meta property="og:url" content={canonical} />}
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/jpeg" href="/images/gipen-original.jpg" />
+  </head>
+  <body><slot /></body>
+</html>
+

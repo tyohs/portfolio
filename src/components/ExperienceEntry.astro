@@ -1,0 +1,33 @@
+---
+import type { Experience } from '../data/portfolio';
+import Period from './Period.astro';
+import Icon from './Icon.astro';
+
+interface Props { entry: Experience; }
+const { entry } = Astro.props;
+const [lead, ...paragraphs] = entry.description ? entry.description.split('\n\n') : [];
+---
+<article class="entry" data-entry={entry.id}>
+  <Period {...entry} />
+  <div class="entry-content">
+    <h3>{entry.organization}</h3>
+    <p class="entry-role">{entry.title}</p>
+    {entry.employmentType && <p class="entry-type">{entry.employmentType}</p>}
+    {lead && <p class="entry-summary">{lead}</p>}
+    {paragraphs.length > 0 && (
+      <details class="entry-details">
+        <summary>
+          <span class="disclosure-label">
+            <span class="when-closed">担当業務を見る</span>
+            <span class="when-open">担当業務を閉じる</span>
+          </span>
+          <Icon name="ChevronDown" />
+        </summary>
+        <div class="detail-copy">
+          {paragraphs.map(paragraph => <p>{paragraph}</p>)}
+        </div>
+      </details>
+    )}
+  </div>
+</article>
+

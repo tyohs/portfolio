@@ -1,0 +1,29 @@
+---
+import { profile, socials } from '../data/portfolio';
+import Icon from './Icon.astro';
+---
+<aside class="identity" aria-label="プロフィール">
+  <div class="identity-title">
+    <div class="name-block">
+      <h1>{profile.name}</h1>
+      <p class="occupation">{profile.occupation}</p>
+    </div>
+    <figure class="portrait">
+      <img src="/images/gipen-original.jpg" alt="白衣とコード眼鏡のペンギン、ギペン" width="928" height="532" />
+    </figure>
+  </div>
+  <p class="affiliations">{profile.community}<br />{profile.affiliations}</p>
+  <div class="socials" aria-label="SNS">
+    {socials.map(social => (
+      <a class="social" href={social.url} target="_blank" rel="noopener noreferrer">
+        <Icon name={social.icon} /><span>{social.label}</span>
+      </a>
+    ))}
+  </div>
+  <nav class="section-links" aria-label="このページの目次">
+    <a href="#career"><span>経歴・活動</span></a>
+    <a href="#education"><span>学歴</span></a>
+    <a href="#skills"><span>スキル</span></a>
+  </nav>
+</aside>
+

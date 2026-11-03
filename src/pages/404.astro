@@ -1,0 +1,17 @@
+---
+import Page from '../layouts/Page.astro';
+---
+<Page title="ページが見つかりません | 神永 陽">
+  <div class="not-found">
+    <p>404</p>
+    <h1>ページが見つかりません</h1>
+    <a href="/">トップページへ戻る</a>
+  </div>
+</Page>
+<style>
+  .not-found { max-width: 40rem; margin: 15vh auto; padding: 24px; }
+  .not-found > p { font-family: PlexMono, monospace; margin-bottom: 24px; }
+  h1 { font-size: 24px; margin-bottom: 32px; }
+  a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 5px; }
+</style>
+

@@ -1,0 +1,11 @@
+---
+import icons from '../data/icons.json';
+
+interface Props {
+  name: keyof typeof icons;
+}
+
+const { name } = Astro.props;
+---
+<span class="icon" data-icon={name} aria-hidden="true"><Fragment set:html={icons[name]} /></span>
+
