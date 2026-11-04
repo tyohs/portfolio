@@ -2,6 +2,8 @@
 
 神永 陽の経歴・活動、学歴、スキルを紹介するAstroの静的サイトです。
 
+公開先: [yoh-kaminaga-portfolio.tyohs-lifeos.workers.dev](https://yoh-kaminaga-portfolio.tyohs-lifeos.workers.dev/)
+
 ## 開発
 
 Node.js 22.23.4以上を使用します。CIはNode.js 24で実行します。
@@ -21,13 +23,13 @@ npm run deploy
 
 Cloudflare Workers Static Assetsで `dist/` を配信します。初回の公開には `npx wrangler login` によるCloudflare認証が必要です。独自ドメインは後から追加できます。
 
-`PUBLIC_SITE_URL` をビルド時に指定すると、そのURLをcanonicalとOG画像に使います。
+canonicalとOG画像のURLは現在のWorkers公開先を使います。独自ドメインへ移行する際は、ビルド時に `PUBLIC_SITE_URL` を指定して上書きできます。
 
 ## 旧版
 
 Next.js版は `archive/nextjs-2026-11-04-08326f4` ブランチに保存しています。移行開始時のコミットは `08326f431be73369ce5d9382d1ab7729ac245a42` です。Gitの履歴は引き継ぎます。
 
-このリポジトリの新しいコミットからVercelへ自動公開しないよう、`vercel.json` でGitデプロイを無効にしています。旧公開先の停止は、Cloudflareでの公開確認後に行います。
+このリポジトリの新しいコミットからVercelへ自動公開しないよう、`vercel.json` でGitデプロイを無効にしています。2026年11月4日にCloudflareでの公開を確認し、旧Vercelプロジェクトを一時停止しました。
 
 ## コンテンツと素材
 
