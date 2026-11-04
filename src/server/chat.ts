@@ -24,7 +24,8 @@ export function chatAvailability(env: ChatEnv, now: number) {
   const expiry = Date.parse(expiresAt);
   if (!Number.isFinite(expiry)) return { ready: false, reason: 'unavailable', expiresAt: DEFAULT_EXPIRY };
   if (now >= expiry) return { ready: false, reason: 'expired', expiresAt };
-  return { ready: Boolean(env.OPENAI_API_KEY?.trim() && env.CHAT_QUOTA), reason: 'setup', expiresAt };
+  const ready = Boolean(env.OPENAI_API_KEY?.trim() && env.CHAT_QUOTA);
+  return { ready, reason: ready ? 'ready' : 'setup', expiresAt };
 }
 
 async function readBody(request: Request): Promise<unknown> {

@@ -9,11 +9,11 @@ export interface QuotaDecision { allowed: boolean; retryAfter?: number; reason?:
 export function reserveQuota(storage: QuotaStorage, client: string, now: number, dailyLimit: number): QuotaDecision {
   const day = Math.floor((now + 9 * 3600000) / 86400000);
   const dayEnd = (day + 1) * 86400000 - 9 * 3600000;
-  const window = Math.floor(now / 600000);
+  const window = Math.floor(now / 60000);
   const buckets = [
     { key: `day:${day}`, limit: dailyLimit, expires: dayEnd, reason: 'daily' as const },
     { key: `client:${day}:${client}`, limit: 20, expires: dayEnd, reason: 'client' as const },
-    { key: `burst:${window}:${client}`, limit: 3, expires: (window + 1) * 600000, reason: 'burst' as const },
+    { key: `burst:${window}:${client}`, limit: 5, expires: (window + 1) * 60000, reason: 'burst' as const },
   ];
   return storage.transactionSync(() => {
     storage.sql.exec('DELETE FROM chat_quota WHERE expires_at <= ?', now);

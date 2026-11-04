@@ -1,0 +1,48 @@
+---
+import Icon from './Icon.astro';
+import '../styles/chat.css';
+import { MAX_MESSAGE_CHARS } from '../lib/chat-contract';
+const questions = ['どんな仕事をしてきた？', '技研では何をしている？', 'どんな技術を使っている？'];
+---
+<section class="section portfolio-chat" id="ask" data-portfolio-chat aria-labelledby="chat-title">
+  <div class="chat-heading">
+    <div class="chat-title"><span class="chat-badge" aria-hidden="true">AI</span><h2 id="chat-title">神永 陽について聞く</h2></div>
+    <button class="chat-reset" type="button" data-chat-reset disabled><Icon name="Renew" /><span>新しい会話</span></button>
+  </div>
+  <p class="chat-intro" data-chat-intro>これまでの仕事や活動、学んでいることについて聞いてみてください。</p>
+  <div class="chat-thread" data-chat-thread role="region" aria-label="AIとの会話" tabindex="0" hidden>
+    <div class="chat-messages" data-chat-messages></div>
+  </div>
+  <button class="chat-latest" data-chat-latest type="button" hidden><Icon name="ArrowDown" /><span>最新の回答へ</span></button>
+  <div class="chat-starters" data-chat-starters aria-label="質問の例">
+    {questions.map(question => <button type="button" data-chat-question={question} disabled>{question}<Icon name="ArrowUpRight" /></button>)}
+  </div>
+  <form class="chat-composer" data-chat-form>
+    <label class="sr-only" for="chat-question">神永 陽についての質問</label>
+    <textarea id="chat-question" name="question" rows="2" maxlength={MAX_MESSAGE_CHARS} placeholder="仕事や活動、学びについて質問する" enterkeyhint="send" data-chat-input disabled></textarea>
+    <div class="chat-composer-bottom">
+      <span class="chat-compose-status" data-chat-compose-status>接続を確認しています…</span>
+      <div class="chat-send-actions">
+        <button class="chat-submit chat-stop" type="button" data-chat-stop aria-label="回答を停止" title="回答を停止" hidden><Icon name="StopFilled" /></button>
+        <button class="chat-submit" type="submit" data-chat-send aria-label="質問を送信" title="送信" disabled><Icon name="ArrowUp" /></button>
+      </div>
+    </div>
+  </form>
+  <p class="chat-notice" data-chat-notice role="status" hidden></p>
+  <p class="chat-disclaimer">公開プロフィールをもとにAIが回答します。入力内容はOpenAIへ送信されます。</p>
+  <span class="sr-only" data-chat-announcement role="status" aria-live="polite" aria-atomic="true"></span>
+  <template data-chat-assistant-template>
+    <article class="chat-message chat-message-assistant" aria-label="AIの回答">
+      <div class="chat-message-label"><span class="chat-badge" aria-hidden="true">AI</span><span>アシスタント</span></div>
+      <div class="chat-answer" data-answer><span class="chat-thinking">回答を考えています<span aria-hidden="true">…</span></span></div>
+      <p class="chat-answer-note" data-answer-note hidden></p>
+      <div class="chat-message-actions" data-answer-actions hidden>
+        <button type="button" class="chat-copy" data-copy title="回答をコピー"><Icon name="Copy" /><span>コピー</span></button>
+      </div>
+    </article>
+  </template>
+  <noscript><p class="chat-notice">AIへの質問にはJavaScriptが必要です。お仕事のご相談は下のメールからお願いします。</p></noscript>
+</section>
+<script>
+  import '../scripts/chat';
+</script>

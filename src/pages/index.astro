@@ -4,6 +4,7 @@ import Profile from '../components/Profile.astro';
 import ExperienceEntry from '../components/ExperienceEntry.astro';
 import Period from '../components/Period.astro';
 import Icon from '../components/Icon.astro';
+import PortfolioChat from '../components/PortfolioChat.astro';
 import { profile, experiences, education, skills } from '../data/portfolio';
 
 const years = [...new Set(experiences.map(entry => entry.start.slice(0, 4)))];
@@ -46,6 +47,7 @@ const years = [...new Set(experiences.map(entry => entry.start.slice(0, 4)))];
           <div class="section-heading"><h2>スキル</h2></div>
           <ul class="skill-list">{skills.map(skill => <li>{skill}</li>)}</ul>
         </section>
+        <PortfolioChat />
         <footer id="contact" class="section contact">
           <p class="contact-caption">お仕事の連絡はこちら</p>
           <a class="email" href={`mailto:${profile.email}`}>

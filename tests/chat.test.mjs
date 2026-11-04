@@ -54,7 +54,7 @@ test('rejects cross-origin, invalid roles, and oversized bodies before the provi
 
 test('status contains no credentials and missing secrets never call OpenAI', async () => {
   const response = await handleChat(new Request(`${origin}/api/chat/status`), env(), { now: () => now });
-  assert.deepEqual(await response.json(), { ready: true, reason: 'setup', expiresAt: '2026-11-25T15:00:00.000Z' });
+  assert.deepEqual(await response.json(), { ready: true, reason: 'ready', expiresAt: '2026-11-25T15:00:00.000Z' });
   assert.equal((await handleChat(request(), env({ OPENAI_API_KEY: undefined }), { now: () => now })).status, 503);
 });
 
@@ -109,6 +109,21 @@ test('SSE decoding preserves Japanese split across chunks and CRLF frames', asyn
   assert.deepEqual(values, ['{"text":"日本語"}', '[DONE]']);
 });
 
+test('stopping the response cancels the upstream request', async () => {
+  let providerSignal;
+  const response = await handleChat(request(), env(), { now: () => now, fetch: async (_url, options) => {
+    providerSignal = options.signal;
+    return new Response(new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode('data: {"type":"response.output_text.delta","delta":"回答"}\n\n'));
+      options.signal.addEventListener('abort', () => controller.error(new DOMException('Aborted', 'AbortError')), { once: true });
+    } }));
+  } });
+  const reader = response.body.getReader();
+  await reader.read();
+  await reader.cancel();
+  assert.equal(providerSignal.aborted, true);
+});
+
 function sqliteStorage() {
   const db = new DatabaseSync(':memory:');
   const storage = {
@@ -135,10 +150,10 @@ test('SQLite quota persists across instances, enforces a global cap, and resets 
 test('SQLite quota enforces burst and client limits without charging rejected requests to global usage', () => {
   const { storage, db } = sqliteStorage();
   try {
-    for (let i = 0; i < 3; i++) assert.equal(reserveQuota(storage, 'a', now, 100).allowed, true);
+    for (let i = 0; i < 5; i++) assert.equal(reserveQuota(storage, 'a', now, 100).allowed, true);
     assert.equal(reserveQuota(storage, 'a', now, 100).reason, 'burst');
-    assert.equal(db.prepare('SELECT uses FROM chat_quota WHERE bucket LIKE ?').get('day:%').uses, 3);
-    for (let i = 3; i < 20; i++) assert.equal(reserveQuota(storage, 'a', now + i * 600000, 100).allowed, true);
+    assert.equal(db.prepare('SELECT uses FROM chat_quota WHERE bucket LIKE ?').get('day:%').uses, 5);
+    for (let i = 5; i < 20; i++) assert.equal(reserveQuota(storage, 'a', now + i * 600000, 100).allowed, true);
     assert.equal(reserveQuota(storage, 'a', now + 21 * 600000, 100).reason, 'client');
   } finally { db.close(); }
 });

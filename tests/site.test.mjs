@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 
 const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
 const plain = value => value.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').trim();
@@ -39,12 +39,25 @@ test('contact, original mascot, and native disclosures are present', () => {
   assert.equal((html.match(/<details\b/g) || []).length, 3);
   assert.equal((html.match(/担当業務を見る/g) || []).length, 3);
   assert.equal((html.match(/担当業務を閉じる/g) || []).length, 3);
-  assert.doesNotMatch(html, /<script\b/);
+  assert.match(html, /id="chat-question"/);
+  assert.match(html, /data-chat-stop/);
+  assert.match(html, /data-chat-assistant-template/);
+  assert.doesNotMatch(html, /sk-proj-|OPENAI_API_KEY|test-key-not-real/);
 });
 
 test('missing routes have a static 404 page', async () => {
   const notFound = await readFile(new URL('../dist/404.html', import.meta.url), 'utf8');
   assert.match(notFound, /ページが見つかりません/);
   assert.match(notFound, /href="\/"/);
+});
+
+test('browser bundles keep the OpenAI endpoint and server secret binding out of public assets', async () => {
+  const directory = new URL('../dist/_astro/', import.meta.url);
+  const files = (await readdir(directory)).filter(file => file.endsWith('.js'));
+  assert.ok(files.length, 'chat must have a client bundle');
+  for (const file of files) {
+    const source = await readFile(new URL(file, directory), 'utf8');
+    assert.doesNotMatch(source, /OPENAI_API_KEY|api\.openai\.com|portfolioInstructions/);
+  }
 });
 
